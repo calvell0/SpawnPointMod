@@ -1,0 +1,5 @@
+{
+  "command": "set",
+  "description": "Set a secondary spawn point at your current location",
+  "params": []
+}
