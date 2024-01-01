@@ -1,10 +1,11 @@
-import { world, system, } from "@minecraft/server";
+import { system, world, } from "@minecraft/server";
 import { MessageFormData } from "@minecraft/server-ui";
 /***************** Global Variables ***********************/
 const JORDAN_NAME = "calvell0";
 let jordan;
 const overworld = world.getDimension("overworld");
 const secondaryPlayerSpawns = new Map();
+const playerSpawnsToMonitor = new Map();
 /**********************************************************/
 const setJordan = (event) => {
     if (!event.initialSpawn || event.player.name !== JORDAN_NAME) {
@@ -49,6 +50,7 @@ const handleChatEvents = (event) => {
     switch (command[0]) {
         case "!set":
             handleSetCommand(event);
+            break;
         default:
             return;
     }
@@ -56,41 +58,62 @@ const handleChatEvents = (event) => {
 const handleSetCommand = (event) => {
     const player = event.sender.id;
     const playerLocation = event.sender.getHeadLocation();
-    secondaryPlayerSpawns.set(player, playerLocation);
+    secondaryPlayerSpawns.set(player, vector3ToDimensionLocation(playerLocation));
+    world.sendMessage("new spawn set: " + secondaryPlayerSpawns.get(player));
 };
 const vector3ToDimensionLocation = (vec) => {
-    if (!vec)
-        return undefined;
-    let x = vec.x;
-    let y = vec.y;
-    let z = vec.z;
+    let x = Math.round(vec.x);
+    let y = Math.round(vec.y);
+    let z = Math.round(vec.z);
     let dimension = world.getDimension("overworld");
     return { x, y, z, dimension };
 };
 const handleDie = (event) => {
-    if (!secondaryPlayerSpawns.has(event.deadEntity.id)) {
+    let secondSpawn;
+    if (!(secondSpawn = secondaryPlayerSpawns.get(event.deadEntity.id))) {
         return;
     }
+
     const player = event.deadEntity;
+    const { x: x1, y: y1, z: z1 } = player.getSpawnPoint() || world.getDefaultSpawnLocation();
+    const { x: x2, y: y2, z: z2 } = secondaryPlayerSpawns.get(player.id) || world.getDefaultSpawnLocation();
     const messageForm = new MessageFormData()
         .title("Select a spawn point:")
-        .button1(`Original spawn: ${player.getSpawnPoint()}`)
-        .button2(`Secondary spawn point: ${secondaryPlayerSpawns.get(player.id)}`);
+        .body(`Original spawn: ${x1}, ${64}, ${z1} \n Secondary spawn point: ${x2}, ${y2}, ${z2}`)
+        .button1(`Original spawn`)
+        .button2(`Secondary spawn`);
     messageForm.show(player).then((formData) => {
         if (formData.selection === 0 || !formData.selection) {
             return;
         }
-        let spawn;
-        if (!(spawn = player.getSpawnPoint())) {
-            console.log("weird error wtf");
-            return;
+        let originalPlayerSpawn;
+        if (!(originalPlayerSpawn = player.getSpawnPoint())) {
+            originalPlayerSpawn = vector3ToDimensionLocation(world.getDefaultSpawnLocation());
         }
-        let newLocation = vector3ToDimensionLocation(secondaryPlayerSpawns.get(player.id));
-        player.setSpawnPoint(newLocation);
-        system.runTimeout(() => {
-            player.setSpawnPoint(spawn);
-        }, 100);
+        player.setSpawnPoint(secondSpawn);
+        // @ts-ignore
+        world.sendMessage(`Set temp spawn: ${secondSpawn.x}, ${secondSpawn.z} for player: ${player.name}`);
+        const { x, y, z } = originalPlayerSpawn;
+        playerSpawnsToMonitor.set(player.id, { x, y, z });
+        world.afterEvents.playerSpawn.subscribe(handleSpawnAfterUsingSecondary);
     });
+};
+const handleSpawnAfterUsingSecondary = (event) => {
+    const player = event.player;
+    world.sendMessage("spawnAfterEvent triggered");
+    if (!playerSpawnsToMonitor.has(player.id)) {
+        return;
+    }
+    let tempOriginalSpawn = playerSpawnsToMonitor.get(player.id);
+    const originalSpawn = vector3ToDimensionLocation(tempOriginalSpawn);
+    system.runTimeout(() => {
+        player.setSpawnPoint(originalSpawn);
+        world.sendMessage(`set original spawn: ${originalSpawn.x}, ${originalSpawn.z} for player: ${player.name}`);
+    }, 100);
+    playerSpawnsToMonitor.delete(player.id);
+    if (playerSpawnsToMonitor.size === 0) {
+        world.afterEvents.playerSpawn.unsubscribe(handleSpawnAfterUsingSecondary);
+    }
 };
 world.afterEvents.playerSpawn.subscribe(setJordan); //check if newly joining players are jordan
 world.afterEvents.playerSpawn.subscribe(sendUserInstructions);

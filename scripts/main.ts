@@ -1,19 +1,14 @@
 import {
-  world,
-  system,
-  EntityHealthChangedAfterEvent,
-  EntityHealthChangedAfterEventSignal,
-  Player,
-  PlayerJoinAfterEvent,
-  PlayerJoinAfterEventSignal,
-  PlayerSpawnAfterEvent,
   ButtonPushAfterEvent,
-  Vector3,
-  Entity,
-  EntityScaleComponent,
   ChatSendBeforeEvent,
-  EntityDieAfterEvent,
   DimensionLocation,
+  Entity,
+  EntityDieAfterEvent,
+  Player,
+  PlayerSpawnAfterEvent,
+  system,
+  Vector3,
+  world,
 } from "@minecraft/server";
 import { MessageFormData, MessageFormResponse } from "@minecraft/server-ui";
 
@@ -21,7 +16,8 @@ import { MessageFormData, MessageFormResponse } from "@minecraft/server-ui";
 const JORDAN_NAME: string = "calvell0";
 let jordan: Player;
 const overworld = world.getDimension("overworld");
-const secondaryPlayerSpawns: Map<string, Vector3> = new Map();
+const secondaryPlayerSpawns: Map<string, DimensionLocation> = new Map();
+const playerSpawnsToMonitor: Map<string, Vector3> = new Map();
 /**********************************************************/
 
 const setJordan = (event: PlayerSpawnAfterEvent) => {
@@ -80,6 +76,7 @@ const handleChatEvents = (event: ChatSendBeforeEvent) => {
   switch (command[0]) {
     case "!set":
       handleSetCommand(event);
+      break;
     default:
       return;
   }
@@ -88,46 +85,78 @@ const handleChatEvents = (event: ChatSendBeforeEvent) => {
 const handleSetCommand = (event: ChatSendBeforeEvent) => {
   const player = event.sender.id;
   const playerLocation = event.sender.getHeadLocation();
-  secondaryPlayerSpawns.set(player, playerLocation);
+
+  secondaryPlayerSpawns.set(player, vector3ToDimensionLocation(playerLocation));
+  world.sendMessage("new spawn set: " + secondaryPlayerSpawns.get(player));
 };
 
-const vector3ToDimensionLocation = (vec: Vector3 | undefined): DimensionLocation | undefined => {
-  if (!vec) return undefined;
-  let x = vec.x;
-  let y = vec.y;
-  let z = vec.z;
+const vector3ToDimensionLocation = (vec: Vector3): DimensionLocation  => {
+
+  let x = Math.round(vec.x);
+  let y = Math.round(vec.y);
+  let z = Math.round(vec.z);
   let dimension = world.getDimension("overworld");
   return { x, y, z, dimension } as DimensionLocation;
 };
 
 const handleDie = (event: EntityDieAfterEvent) => {
-  if (!secondaryPlayerSpawns.has(event.deadEntity.id)) {
+  let secondSpawn: DimensionLocation | undefined;
+  if (!(secondSpawn = secondaryPlayerSpawns.get(event.deadEntity.id))) {
     return;
   }
 
+  secondSpawn = secondSpawn as DimensionLocation;
+
   const player = event.deadEntity as Player;
+  const { x: x1, y: y1, z: z1 } = player.getSpawnPoint() || world.getDefaultSpawnLocation();
+  const { x: x2, y: y2, z: z2 } = secondaryPlayerSpawns.get(player.id) || world.getDefaultSpawnLocation();
   const messageForm = new MessageFormData()
     .title("Select a spawn point:")
-    .button1(`Original spawn: ${player.getSpawnPoint()}`)
-    .button2(`Secondary spawn point: ${secondaryPlayerSpawns.get(player.id)}`);
+    .body(`Original spawn: ${x1}, ${64}, ${z1} \n Secondary spawn point: ${x2}, ${y2}, ${z2}`)
+    .button1(`Original spawn`)
+    .button2(`Secondary spawn`);
 
   messageForm.show(player).then((formData: MessageFormResponse) => {
     if (formData.selection === 0 || !formData.selection) {
       return;
     }
-    let spawn: DimensionLocation | undefined;
-    if (!(spawn = player.getSpawnPoint())) {
-      console.log("weird error wtf");
-      return;
+    let originalPlayerSpawn: DimensionLocation | undefined;
+    if (!(originalPlayerSpawn = player.getSpawnPoint())) {
+      originalPlayerSpawn = vector3ToDimensionLocation(world.getDefaultSpawnLocation());
     }
 
-    let newLocation = vector3ToDimensionLocation(secondaryPlayerSpawns.get(player.id));
-    player.setSpawnPoint(newLocation);
-    system.runTimeout(() => {
-      player.setSpawnPoint(spawn);
-    }, 100);
+    player.setSpawnPoint(secondSpawn);
+    // @ts-ignore
+    world.sendMessage(`Set temp spawn: ${secondSpawn.x}, ${secondSpawn.z} for player: ${player.name}`);
+    const { x, y, z } = originalPlayerSpawn;
+    playerSpawnsToMonitor.set(player.id, { x, y, z });
+
+    world.afterEvents.playerSpawn.subscribe(handleSpawnAfterUsingSecondary);
   });
-};
+}
+
+const handleSpawnAfterUsingSecondary = (event: PlayerSpawnAfterEvent) => {
+  const player = event.player;
+  world.sendMessage("spawnAfterEvent triggered");
+  if (!playerSpawnsToMonitor.has(player.id)){
+    return;
+  }
+
+
+  let tempOriginalSpawn: Vector3 = playerSpawnsToMonitor.get(player.id) as Vector3;
+  const originalSpawn: DimensionLocation = vector3ToDimensionLocation(tempOriginalSpawn);
+
+
+  system.runTimeout(() => {
+    player.setSpawnPoint(originalSpawn);
+    world.sendMessage(`set original spawn: ${originalSpawn.x}, ${originalSpawn.z} for player: ${player.name}`)
+  }, 100);
+  playerSpawnsToMonitor.delete(player.id);
+
+  if (playerSpawnsToMonitor.size === 0){
+    world.afterEvents.playerSpawn.unsubscribe(handleSpawnAfterUsingSecondary);
+  }
+}
 
 world.afterEvents.playerSpawn.subscribe(setJordan); //check if newly joining players are jordan
 world.afterEvents.playerSpawn.subscribe(sendUserInstructions);
