@@ -1,1 +1,0 @@
-{"version":3,"sources":["Command.ts"],"names":[],"mappings":"","file":"../cotta/scripts/Command.js","sourcesContent":["import { WorldBeforeEvents } from \"@minecraft/server\";\r\n\r\ninterface Command {\r\n  text: string;\r\n  description: string;\r\n\r\n  handle(event: any): void;\r\n}\r\n\r\nexport default Command;\r\n"],"sourceRoot":"../../../scripts/"}
