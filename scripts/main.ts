@@ -16,7 +16,7 @@ import { getRandomNewLocation } from "./resources/Utilities";
 import PlayerInterface from "./PlayerInterface";
 
 /***************** Global Variables ***********************/
-const JORDAN_NAME: string = "FlapJackFam";
+const JORDAN_NAME: string = "calvell0";
 let jordan: Player;
 const overworld = world.getDimension("overworld");
 const reader: CommandReader = CommandReader.getReader();
