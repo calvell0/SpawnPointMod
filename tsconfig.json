@@ -1,5 +1,5 @@
 { 
-    "compilerOptions":{ 
+    "compilerOptions":{
        "target":"es6",
        "moduleResolution":"node",
        "module":"es2020",
@@ -20,13 +20,20 @@
        "rootDir": ".",
        "baseUrl":"behavior_packs/",
        "listFiles":false,
-       "noEmitHelpers":true
+       "noEmitHelpers":true,
+       "resolveJsonModule": true,
+       "esModuleInterop": true,
+      "paths": {
+        "@minecraft/server": ["node_modules/@minecraft/server"],
+        "@minecraft/server-ui": ["node_modules/@minecraft/server-ui"]
+      }
     },
     "include":[ 
-       "scripts/**/*"
+       "scripts/**/*",
+       "scripts/**/**/*"
     ],
     "exclude":[ 
-       "node_modules"
+      "node_modules"
     ],
     "compileOnSave":false
  }
