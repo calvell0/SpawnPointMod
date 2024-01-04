@@ -1,6 +1,7 @@
 // === CONFIGURABLE VARIABLES
 
 const bpfoldername = "cotta";
+const rpfoldername = "buildchallrp";
 const useMinecraftPreview = false; // Whether to target the "Minecraft Preview" version of Minecraft vs. the main store version of Minecraft
 const useMinecraftDedicatedServer = false; // Whether to use Bedrock Dedicated Server - see https://www.minecraft.net/download/server/bedrock
 const dedicatedServerPath = "C:/mc/bds/1.19.0/"; // if using Bedrock Dedicated Server, where to find the extracted contents of the zip package
@@ -13,6 +14,7 @@ const del = require("del");
 const os = require("os");
 const spawn = require("child_process").spawn;
 const sourcemaps = require("gulp-sourcemaps");
+const zip = import("gulp-zip");
 
 const worldsFolderName = useMinecraftDedicatedServer ? "worlds" : "minecraftWorlds";
 
@@ -21,12 +23,12 @@ const activeWorldFolderName = useMinecraftDedicatedServer ? "Bedrock level" : bp
 const mcdir = useMinecraftDedicatedServer
   ? dedicatedServerPath
   : os.homedir() +
-    (useMinecraftPreview
-      ? "/AppData/Local/Packages/Microsoft.MinecraftWindowsBeta_8wekyb3d8bbwe/LocalState/games/com.mojang/"
-      : "/AppData/Local/Packages/Microsoft.MinecraftUWP_8wekyb3d8bbwe/LocalState/games/com.mojang/");
+  (useMinecraftPreview
+    ? "/AppData/Local/Packages/Microsoft.MinecraftWindowsBeta_8wekyb3d8bbwe/LocalState/games/com.mojang/"
+    : "/AppData/Local/Packages/Microsoft.MinecraftUWP_8wekyb3d8bbwe/LocalState/games/com.mojang/");
 
 function clean_build(callbackFunction) {
-  del(["build/behavior_packs/", "build/resource_packs/"]).then(
+  del(["build/behavior_packs/", "build/resource_packs/", "build/worlds"]).then(
     (value) => {
       callbackFunction(); // success
     },
@@ -44,6 +46,13 @@ function copy_resource_packs() {
   return gulp.src(["resource_packs/**/*"]).pipe(gulp.dest("build/resource_packs"));
 }
 
+function pack_world() {
+  return gulp
+    .src("build/worlds/default/**/*")
+    .pipe(zip(bpfoldername + ".mcworld"))
+    .pipe(gulp.dest("dist"));
+}
+
 const copy_content = gulp.parallel(copy_behavior_packs, copy_resource_packs);
 
 function compile_scripts() {
@@ -52,11 +61,11 @@ function compile_scripts() {
     .pipe(sourcemaps.init())
     .pipe(
       ts({
-        module: "es2020",
+        module: "esnext",
         moduleResolution: "node",
-        lib: ["es2020", "dom"],
+        lib: ["esnext", "dom"],
         strict: true,
-        target: "es2020",
+        target: "esnext",
         noImplicitAny: true,
       })
     )
@@ -70,6 +79,7 @@ function compile_scripts() {
 }
 
 const build = gulp.series(clean_build, copy_content, compile_scripts);
+const buildworld = gulp.series(build, copy_world_to_build, copy_bps_to_world_build);
 
 function clean_localmc(callbackFunction) {
   if (!bpfoldername || !bpfoldername.length || bpfoldername.length < 2) {
@@ -99,8 +109,8 @@ function deploy_localmc_behavior_packs() {
 
 function deploy_localmc_resource_packs() {
   return gulp
-    .src(["build/resource_packs/" + bpfoldername + "/**/*"])
-    .pipe(gulp.dest(mcdir + "development_resource_packs/" + bpfoldername));
+    .src(["build/resource_packs/" + rpfoldername + "/**/*"])
+    .pipe(gulp.dest(mcdir + "development_resource_packs/" + rpfoldername));
 }
 
 function getTargetWorldPath() {
@@ -231,6 +241,16 @@ function backup_localmc_world() {
     .pipe(gulp.dest(getTargetWorldBackupPath() + "/" + activeWorldFolderName));
 }
 
+function copy_world_to_build() {
+  return gulp.src([getDevWorldPath() + "/**/*"]).pipe(gulp.dest("build/" + getDevWorldPath()));
+}
+
+function copy_bps_to_world_build() {
+  return gulp
+    .src(["build/behavior_packs/" + bpfoldername + "/**/*"])
+    .pipe(gulp.dest("build/" + getDevWorldPath() + "/behavior_packs/" + bpfoldername + "/"));
+}
+
 const deploy_localmc = gulp.series(
   clean_localmc,
   function (callbackFunction) {
@@ -238,6 +258,27 @@ const deploy_localmc = gulp.series(
   },
   gulp.parallel(deploy_localmc_behavior_packs, deploy_localmc_resource_packs)
 );
+
+function create_bp_mcpack() {
+  return gulp
+    .src(["build/behavior_packs/" + bpfoldername + "/**/*"])
+    .pipe(zip(bpfoldername + ".mcpack"))
+    .pipe(gulp.dest("build/packages/"));
+}
+
+function create_rp_mcpack() {
+  return gulp
+    .src(["build/resource_packs/" + rpfoldername + "/**/*"])
+    .pipe(zip(rpfoldername + ".mcpack"))
+    .pipe(gulp.dest("build/packages/"));
+}
+
+function create_mcaddon() {
+  return gulp
+    .src(["build/packages/" + bpfoldername + ".mcpack", "build/packages/" + rpfoldername + ".mcpack"])
+    .pipe(zip(bpfoldername + ".mcaddon"))
+    .pipe(gulp.dest("build/packages/"));
+}
 
 function watch() {
   return gulp.watch(
@@ -304,6 +345,8 @@ exports.copy_resource_packs = copy_resource_packs;
 exports.compile_scripts = compile_scripts;
 exports.copy_content = copy_content;
 exports.build = build;
+exports.buildworld = buildworld;
+exports.packworld = gulp.series(buildworld, pack_world);
 exports.clean_localmc = clean_localmc;
 exports.deploy_localmc = deploy_localmc;
 exports.default = gulp.series(build, deploy_localmc);
@@ -316,5 +359,6 @@ exports.updateworld = gulp.series(
   clean_localmc_world,
   deploy_localmc_world
 );
+exports.package = gulp.series(build, gulp.parallel(create_bp_mcpack, create_rp_mcpack), create_mcaddon);
 exports.ingestworld = gulp.series(clean_dev_world_backup, backup_dev_world, clean_dev_world, ingest_localmc_world);
 exports.updateconfig = gulp.series(clean_localmc_config, deploy_localmc_config);

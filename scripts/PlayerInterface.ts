@@ -15,4 +15,13 @@ export default class PlayerInterface{
 
     return messageForm.show(player);
   }
+  static setTitle(player: Player, title: string, subtitle: string = "") {
+    player.onScreenDisplay.setTitle(title, {
+      stayDuration: 80,
+      fadeInDuration: 4,
+      fadeOutDuration: 3,
+      subtitle: subtitle
+    });
+  }
+
 }

@@ -1,24 +1,24 @@
 import Command from "../model/Command";
 import { ChatSendBeforeEvent, DimensionLocation, Player, Vector3, world } from "@minecraft/server";
-import Utilities from "../Utilities";
+import { isPlayer } from "../Utilities";
 import SpawnPointService from "../../SpawnPointService";
+
 
 export default class SetSpawn implements Command {
   private text: string = "!setspawn";
   private description: string = "Set a secondary spawn point at your current location";
-  private spawnService: SpawnPointService = SpawnPointService.getSpawnService();
+  private spawnService: SpawnPointService;
 
-  constructor() {
-  }
+
 
   handle(command: string[], player: Player) {
     if (player.dimension !== world.getDimension("overworld")){
-      player.sendMessage(`Error: can't set spawn points in dimension: ${player.dimension.id}`);
+      player.sendMessage(`§cError: can't set spawn points in dimension: ${player.dimension.id}`);
       return;
     }
     this.spawnService.registerPlayerSpawn(player);
     const { x, y, z } = player.location;
-    player.sendMessage(`Added a new spawn point: x:${x}, y:${y}, z:${z}`);
+    player.sendMessage(`Added a new spawn point: §3${Math.round(x)}, ${Math.round(y)}, ${Math.round(z)}`);
   }
 
   getDescription(): string {
@@ -28,4 +28,11 @@ export default class SetSpawn implements Command {
   getText(): string {
     return this.text;
   }
+
+  constructor() {
+    this.spawnService = SpawnPointService.getSpawnService();
+    this.getText = this.getText.bind(this);
+    this.getDescription = this.getDescription.bind(this);
+  }
+
 }

@@ -1,94 +1,102 @@
 import {
-  DimensionLocation, Entity,
-  EntityDieAfterEvent, EntityQueryOptions,
+  DimensionLocation,
+  Entity,
+  EntityDieAfterEvent,
+  EntityQueryOptions,
   Player,
-  PlayerSpawnAfterEvent, system,
+  PlayerSpawnAfterEvent,
+  system,
   Vector3,
   world,
 } from "@minecraft/server";
-import Utilities from "./resources/Utilities";
+import { getOriginalSpawn, isPlayer, vector3ToDimensionLocation } from "./resources/Utilities";
 import PlayerInterface from "./PlayerInterface";
 import { MessageFormResponse } from "@minecraft/server-ui";
-import { handleGenericPlayerEvent } from "./fuckWithPlayers";
 
-export default class SpawnPointService{
+import { log } from "./resources/Log"
 
+export default class SpawnPointService {
   static spawnPointService: SpawnPointService;
 
-  private playerSpawns: Map<string, Spawns>;
   //key: player id to be monitored value: original player spawn point
   private playerSpawnsToMonitor: Set<string>;
-  private listeningToSpawns:boolean = false;
+  private listeningToSpawns: boolean = false;
 
   private constructor() {
-    this.playerSpawns = new Map();
+    SpawnPointService.spawnPointService = this;
+    this.listenToSpawns = this.listenToSpawns.bind(this);
+    this.handleEntityDie = this.handleEntityDie.bind(this);
+    this.handlePlayerSpawn = this.handlePlayerSpawn.bind(this);
+    this.handlePlayerResponse = this.handlePlayerResponse.bind(this);
+    this.registerPlayerSpawn = this.registerPlayerSpawn.bind(this);
     this.playerSpawnsToMonitor = new Set();
     world.afterEvents.entityDie.subscribe(this.handleEntityDie);
-    this.handleEntityDie = this.handleEntityDie.bind(this);
-    this.registerPlayerSpawn = this.registerPlayerSpawn.bind(this);
-    this.handlePlayerResponse = this.handlePlayerResponse.bind(this);
-    this.listenToSpawns = this.listenToSpawns.bind(this);
-    this.handlePlayerSpawn = this.handlePlayerSpawn.bind(this);
   }
 
-  static getSpawnService():SpawnPointService {
+  static getSpawnService(): SpawnPointService {
     return SpawnPointService.spawnPointService || new SpawnPointService();
   }
 
-  registerPlayerSpawn(player: Player):void{
-    const playerLocation: DimensionLocation = Utilities.vector3ToDimensionLocation(player.getHeadLocation());
-    const playerSpawn: DimensionLocation = Utilities.getOriginalSpawn(player);
-    this.playerSpawns.set(player.id, { originalSpawn: playerSpawn, secondarySpawn: playerLocation });
+  registerPlayerSpawn(player: Player): void {
+    const playerLocation: Vector3 = player.getHeadLocation();
+    let { x, y, z }: Vector3 = playerLocation;
+    x = Math.round(x);
+    y = Math.round(y);
+    z = Math.round(z);
+    
+    world.setDynamicProperty(`${player.id}:secondarySpawn`, { x, y, z } as Vector3);
   }
 
-  handleEntityDie(event: EntityDieAfterEvent):void {
-    if (!Utilities.entityIsPlayer(event.deadEntity) ||
-      !this.playerSpawns.has(event.deadEntity.id))
-    {
+  handleEntityDie(event: EntityDieAfterEvent): void {
+    const deadEntity = event.deadEntity;
+    if (!isPlayer(deadEntity) || !(world.getDynamicProperty(`${deadEntity.id}:secondarySpawn`))) {
       return;
     }
+    const player: Player = deadEntity as Player;
+    const secondarySpawn: Vector3 =
+      world.getDynamicProperty(`${player.id}:secondarySpawn`) as Vector3;
+    const originalSpawn: Vector3 = getOriginalSpawn(player);
 
-    const player: Player = event.deadEntity as Player;
     // @ts-ignore function exits early if player id is not in playerSpawns
-    const {originalSpawn, secondarySpawn } = this.playerSpawns.get(player.id);
 
 
-    PlayerInterface.promptDeadPlayer(player, originalSpawn, secondarySpawn)
-      .then((response: MessageFormResponse)=> {
+    PlayerInterface.promptDeadPlayer(player, originalSpawn, secondarySpawn).then((response: MessageFormResponse) => {
       this.handlePlayerResponse(response, player);
     });
   }
 
-  handlePlayerResponse(response: MessageFormResponse, player: Player){
-    if (response.selection === 1 || !response){
+  handlePlayerResponse(response: MessageFormResponse, player: Player) {
+    if (response.canceled || response.selection === 0) {
       return;
     }
-    //@ts-ignore
-    const { originalSpawn, secondarySpawn } = this.playerSpawns.get(player.id);
-    player.setSpawnPoint(secondarySpawn);
     this.listenToSpawns(player);
   }
 
-  listenToSpawns(player: Player){
-    if (!this.listeningToSpawns){
+  listenToSpawns(player: Player) {
+    if (!this.listeningToSpawns) {
       world.afterEvents.playerSpawn.subscribe(this.handlePlayerSpawn);
       this.listeningToSpawns = true;
     }
     this.playerSpawnsToMonitor.add(player.id);
   }
 
-  handlePlayerSpawn(event: PlayerSpawnAfterEvent):void {
-    if (!this.playerSpawnsToMonitor.has(event.player.id)){
+  handlePlayerSpawn(event: PlayerSpawnAfterEvent): void {
+    if (!this.playerSpawnsToMonitor.has(event.player.id)) {
       return;
     }
-    const player = event.player;
-    //@ts-ignore
-    const { originalSpawn } = this.playerSpawns.get(player.id);
-    system.runTimeout(() => {
-      player.setSpawnPoint(originalSpawn);
-    })
+    const player: Player = event.player;
+
+    const { x, y, z }: Vector3 =
+      world.getDynamicProperty(`${player.id}:secondarySpawn`) as Vector3;
+
+
+    player.teleport({ x, y, z },
+      {
+        dimension: world.getDimension("overworld")
+      });
+
     this.playerSpawnsToMonitor.delete(player.id);
-    if (this.playerSpawnsToMonitor.size === 0){
+    if (this.playerSpawnsToMonitor.size === 0) {
       world.afterEvents.playerSpawn.unsubscribe(this.handlePlayerSpawn);
       this.listeningToSpawns = false;
     }

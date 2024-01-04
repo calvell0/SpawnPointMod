@@ -2,21 +2,16 @@
 
 import { ChatSendBeforeEvent, Player } from "@minecraft/server";
 import Command from "./resources/model/Command";
-import allCommands from "./resources/commands/index.js";
+import allCommands from "./resources/commands/index";
 
 /*
 Singleton class for reading chat events and parsing commands
  */
 export default class CommandReader{
-  private constructor() {
-    CommandReader.reader = this;
-  }
-
-
 
   private static reader: CommandReader | undefined;
 
-  static getCommandReader(): CommandReader {
+  static getReader(): CommandReader {
     return CommandReader.reader || new CommandReader();
   }
 
@@ -35,9 +30,14 @@ export default class CommandReader{
         return;
       }
     }
+    event.sender.sendMessage("§c Error: Invalid command. Type §3!help §cto see a list of commands.")
+
 
   };
 
+  private constructor() {
+    CommandReader.reader = this;
+  }
 
 
 
