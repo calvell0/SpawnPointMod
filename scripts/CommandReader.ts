@@ -26,7 +26,7 @@ export default class CommandReader{
 
     for (let cmd of allCommands){
       if (chatCommand.equalsIgnoreCase(cmd.getText())){
-        cmd.handle(args, event.sender);
+        cmd.handle(event, args);
         return;
       }
     }

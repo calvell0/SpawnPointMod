@@ -1,4 +1,4 @@
-import { DimensionLocation, Player } from "@minecraft/server";
+import { DimensionLocation, Player, PlayerSpawnAfterEvent, system } from "@minecraft/server";
 import { MessageFormData, MessageFormResponse } from "@minecraft/server-ui";
 
 
@@ -23,5 +23,16 @@ export default class PlayerInterface{
       subtitle: subtitle
     });
   }
+
+  static handlePlayerLoad = (event: PlayerSpawnAfterEvent) => {
+    if (!event.initialSpawn){
+      return;
+    }
+    // PlayerInterface.setTitle(event.player, "Welcome, Sack Chaser!");
+    system.runTimeout(() => {
+      event.player.sendMessage("Type §3!setspawn §fin chat to set a secondary spawn point. You'll be able to select which point to spawn at after dying. Type §3!help §ffor a list of commands.")
+    }, 100);
+
+  };
 
 }

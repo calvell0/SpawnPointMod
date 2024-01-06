@@ -16,7 +16,7 @@ import { MessageFormResponse } from "@minecraft/server-ui";
 import { log } from "./resources/Log"
 
 export default class SpawnPointService {
-  static spawnPointService: SpawnPointService;
+  private static spawnPointService: SpawnPointService;
 
   //key: player id to be monitored value: original player spawn point
   private playerSpawnsToMonitor: Set<string>;
@@ -44,17 +44,17 @@ export default class SpawnPointService {
     y = Math.round(y);
     z = Math.round(z);
     
-    world.setDynamicProperty(`${player.id}:secondarySpawn`, { x, y, z } as Vector3);
+    player.setDynamicProperty(`spawn:secondary`, { x, y, z } as Vector3);
   }
 
   handleEntityDie(event: EntityDieAfterEvent): void {
     const deadEntity = event.deadEntity;
-    if (!isPlayer(deadEntity) || !(world.getDynamicProperty(`${deadEntity.id}:secondarySpawn`))) {
+    if (!isPlayer(deadEntity) || !(deadEntity.getDynamicProperty(`spawn:secondary`))) {
       return;
     }
     const player: Player = deadEntity as Player;
     const secondarySpawn: Vector3 =
-      world.getDynamicProperty(`${player.id}:secondarySpawn`) as Vector3;
+      player.getDynamicProperty(`spawn:secondary`) as Vector3;
     const originalSpawn: Vector3 = getOriginalSpawn(player);
 
     // @ts-ignore function exits early if player id is not in playerSpawns
@@ -87,7 +87,7 @@ export default class SpawnPointService {
     const player: Player = event.player;
 
     const { x, y, z }: Vector3 =
-      world.getDynamicProperty(`${player.id}:secondarySpawn`) as Vector3;
+      player.getDynamicProperty(`spawn:secondary`) as Vector3;
 
 
     player.teleport({ x, y, z },

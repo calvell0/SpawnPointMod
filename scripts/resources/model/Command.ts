@@ -1,10 +1,11 @@
-import { Player, WorldBeforeEvents } from "@minecraft/server";
+import { ChatSendBeforeEvent, Player, WorldBeforeEvents } from "@minecraft/server";
 
 export default interface Command {
 
-  handle(command: string[], player: Player): void;
+  handle(event: ChatSendBeforeEvent, command?: string[]): void;
   getText(): string;
   getDescription(): string;
+  getSyntax(): string;
 }
 
 

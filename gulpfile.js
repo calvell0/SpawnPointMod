@@ -1,7 +1,7 @@
 // === CONFIGURABLE VARIABLES
 
-const bpfoldername = "cotta";
-const rpfoldername = "buildchallrp";
+const bpfoldername = "Deez";
+const rpfoldername = "Deez";
 const useMinecraftPreview = false; // Whether to target the "Minecraft Preview" version of Minecraft vs. the main store version of Minecraft
 const useMinecraftDedicatedServer = false; // Whether to use Bedrock Dedicated Server - see https://www.minecraft.net/download/server/bedrock
 const dedicatedServerPath = "C:/mc/bds/1.19.0/"; // if using Bedrock Dedicated Server, where to find the extracted contents of the zip package
@@ -67,6 +67,7 @@ function compile_scripts() {
         strict: true,
         target: "esnext",
         noImplicitAny: true,
+
       })
     )
     .pipe(

@@ -11,7 +11,8 @@ export default class SetSpawn implements Command {
 
 
 
-  handle(command: string[], player: Player) {
+  handle(event: ChatSendBeforeEvent, command?: string[]) {
+    const player = event.sender;
     if (player.dimension !== world.getDimension("overworld")){
       player.sendMessage(`§cError: can't set spawn points in dimension: ${player.dimension.id}`);
       return;
@@ -26,6 +27,10 @@ export default class SetSpawn implements Command {
   }
 
   getText(): string {
+    return this.text;
+  }
+
+  getSyntax(): string {
     return this.text;
   }
 
