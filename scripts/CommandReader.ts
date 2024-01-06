@@ -1,7 +1,6 @@
 
 
-import { ChatSendBeforeEvent, Player } from "@minecraft/server";
-import Command from "./resources/model/Command";
+import { ChatSendBeforeEvent } from "@minecraft/server";
 import allCommands from "./resources/commands/index";
 
 /*

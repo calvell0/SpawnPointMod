@@ -1,5 +1,5 @@
 import Command from "../model/Command";
-import { ChatSendBeforeEvent, Player, Vector3 } from "@minecraft/server";
+import { ChatSendBeforeEvent, Vector3 } from "@minecraft/server";
 import { coordsToString } from "../Utilities";
 
 export default class GetSpawn implements Command{

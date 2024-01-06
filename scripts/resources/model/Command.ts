@@ -1,4 +1,4 @@
-import { ChatSendBeforeEvent, Player, WorldBeforeEvents } from "@minecraft/server";
+import { ChatSendBeforeEvent } from "@minecraft/server";
 
 export default interface Command {
 

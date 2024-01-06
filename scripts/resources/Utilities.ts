@@ -1,4 +1,4 @@
-import { Dimension, DimensionLocation, Entity, EntityQueryOptions, Player, Vector3, world } from "@minecraft/server";
+import { Dimension, DimensionLocation, Entity, Player, Vector3, world } from "@minecraft/server";
 
 
 /**

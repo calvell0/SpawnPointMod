@@ -1,6 +1,5 @@
 import Command from "../model/Command";
-import { ChatSendBeforeEvent, DimensionLocation, Player, Vector3, world } from "@minecraft/server";
-import { isPlayer } from "../Utilities";
+import { ChatSendBeforeEvent, world } from "@minecraft/server";
 import SpawnPointService from "../../SpawnPointService";
 
 

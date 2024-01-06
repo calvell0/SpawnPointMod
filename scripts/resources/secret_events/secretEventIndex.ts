@@ -1,4 +1,4 @@
-import { SecretEvent } from "../model/SecretEvent";
+
 import AnnoyingMobSpawner from "./AnnoyingMobSpawner";
 import ChangeHotbarSlot from "./ChangeHotbarSlot";
 

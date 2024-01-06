@@ -1,4 +1,4 @@
-import { Player, WorldAfterEvents } from "@minecraft/server";
+
 
 export interface SecretEvent {
   annoyingLevel: number;

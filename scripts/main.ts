@@ -1,17 +1,6 @@
-import {
-  ChatSendBeforeEvent,
-  DimensionLocation,
-  Entity,
-  EntityDieAfterEvent,
-  Player, PlayerBreakBlockBeforeEvent,
-  PlayerSpawnAfterEvent,
-  system,
-  Vector3,
-  world, WorldInitializeAfterEvent
-} from "@minecraft/server";
+import { world } from "@minecraft/server";
 
 import CommandReader from "./CommandReader";
-import { getRandomNewLocation } from "./resources/Utilities";
 import PlayerInterface from "./PlayerInterface";
 import SecretEventService from "./SecretEventService";
 
