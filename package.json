@@ -1,7 +1,7 @@
 {
-  "name": "scripting-starter",
+  "name": "SpawnPointMod",
   "version": "0.1.0",
-  "productName": "Minecraft TypeScript Starter Project",
+  "productName": "SpawnPointMod",
   "description": "Minecraft TypeScript Starter Project",
   "private": true,
   "devDependencies": {

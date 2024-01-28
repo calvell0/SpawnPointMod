@@ -1,7 +1,7 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Deez behavior pack",
+    "name": "SpawnPointMod",
     "description": "My TS mod",
     "uuid": "6740c511-810c-4873-94a4-13b488aed910",
     "version": [0, 0, 1],
