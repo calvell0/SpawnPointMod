@@ -7,10 +7,11 @@ export default class SetSpawn implements Command {
   private text: string = "!setspawn";
   private description: string = "Set a secondary spawn point at your current location";
   private spawnService: SpawnPointService;
+  private readonly privileged: boolean = false;
 
 
 
-  handle(event: ChatSendBeforeEvent, command?: string[]) {
+  run(event: ChatSendBeforeEvent, command?: string[]) {
     const player = event.sender;
     if (player.dimension !== world.getDimension("overworld")){
       player.sendMessage(`§cError: can't set spawn points in dimension: ${player.dimension.id}`);
@@ -33,8 +34,12 @@ export default class SetSpawn implements Command {
     return this.text;
   }
 
-  constructor() {
-    this.spawnService = SpawnPointService.getSpawnService();
+  isPrivileged(): boolean {
+    return this.privileged;
+  }
+
+  constructor(spawnService: SpawnPointService) {
+    this.spawnService = spawnService;
     this.getText = this.getText.bind(this);
     this.getDescription = this.getDescription.bind(this);
   }

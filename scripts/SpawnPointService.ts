@@ -101,4 +101,8 @@ export default class SpawnPointService {
       this.listeningToSpawns = false;
     }
   }
+
+  getPlayerSpawn(player: Player):Vector3 | undefined {
+    return player.getDynamicProperty("spawn:secondary") as Vector3 | undefined;
+  }
 }

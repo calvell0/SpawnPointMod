@@ -40,19 +40,23 @@ export function isPlayer(entity: Entity): boolean {
  * @param coordinates - the base coordinates
  * @param maxDistance - the maximum absolute value of the difference between base and new coordinates. Default value of 25
  */
-export function getRandomNewLocation(coordinates: Vector3 | DimensionLocation, maxDistance: number = 25): Vector3 | DimensionLocation {
+export function getRandomNewLocation<Type extends Vector3 | DimensionLocation>(coordinates: Type, maxDistance: number = 25): Type {
   coordinates.x += Math.round(Math.random() * (maxDistance * 2)) - maxDistance;
   coordinates.z += Math.round(Math.random() * (maxDistance * 2)) - maxDistance;
   return coordinates;
 }
 
-export function getPlayerFromList(player: Player, list: PlayerTarget[]):PlayerTarget | undefined {
+export function getPlayerFromList(name: string, list: PlayerTarget[]):PlayerTarget | undefined {
   for(let pTarget of list){
-    if (player.name.equalsIgnoreCase(pTarget.username)){
+    if (name.equalsIgnoreCase(pTarget.username)){
       return pTarget;
     }
   }
   return undefined;
+}
+
+export function getActivePlayerByName(name: string): Player | undefined {
+  return world.getPlayers().filter(player => player.name === name)[0] || undefined;
 }
 
 export function randomChance(chance: number):boolean{
@@ -66,7 +70,7 @@ export function randomChance(chance: number):boolean{
  * @param choices - Array of options you'd like to select from
  * @returns a randomly selected member of the **choices** that were passed
  */
-export function pickRandomUnweighted<Type>(choices: Type[]):Type {
+export function pickRandomUnweighted<T>(choices: T[]):T {
   const rng = Math.random();
   const selectedIndex = Math.round(rng * (choices.length - 1));
   return choices[selectedIndex];
@@ -82,6 +86,15 @@ function pickRandomWeighted<Type>(choices: WeightedChoice<Type>[]):Type {
      return a.weight - b.weight;
     });
   return choices[0].value;
+}
+
+export function replaceSpaces(originalString: string): string{
+  let spaceLocation: number;
+  let newString = originalString.split("");
+  while((spaceLocation = originalString.indexOf("+")) !== -1){
+    newString[spaceLocation] = " ";
+  }
+  return newString.join();
 }
 
 

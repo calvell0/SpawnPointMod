@@ -1,9 +1,9 @@
 {
   "format_version": 2,
   "header": {
-    "name": "Cotta behavior pack",
+    "name": "Deez behavior pack",
     "description": "My TS mod",
-    "uuid": "6740c511-810c-4873-94a4-13b488aed919",
+    "uuid": "6740c511-810c-4873-94a4-13b488aed910",
     "version": [0, 0, 1],
     "min_engine_version": [1, 20, 30]
   },
@@ -12,7 +12,7 @@
       "description": "Script resources",
       "language": "javascript",
       "type": "script",
-      "uuid": "1ceb1d19-df31-483a-8169-f2cc75db4c08",
+      "uuid": "1ceb1d19-df31-483a-8169-f2cc75db4c09",
       "version": [0, 0, 1],
       "entry": "scripts/main.js"
     }
@@ -25,6 +25,10 @@
     {
       "module_name": "@minecraft/server-ui",
       "version": "1.2.0-beta"
+    },
+    {
+      "module_name": "@minecraft/vanilla-data",
+      "version": "1.20.50"
     }
   ]
 }

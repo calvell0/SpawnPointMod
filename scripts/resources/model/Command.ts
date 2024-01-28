@@ -2,10 +2,11 @@ import { ChatSendBeforeEvent } from "@minecraft/server";
 
 export default interface Command {
 
-  handle(event: ChatSendBeforeEvent, command?: string[]): void;
+  run(event: ChatSendBeforeEvent, args?: string[]): void;
   getText(): string;
   getDescription(): string;
   getSyntax(): string;
+  isPrivileged(): boolean;
 }
 
 
