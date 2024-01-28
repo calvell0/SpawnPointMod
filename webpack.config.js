@@ -5,7 +5,7 @@ module.exports = {
   entry: './scripts/main.ts', // your entry TypeScript file
   output: {
     filename: 'main.bundle.js', // the bundled JavaScript file
-    path: path.resolve(__dirname, 'build/behavior_packs/cotta/scripts'),
+    path: path.resolve(__dirname, 'build/behavior_packs/SpawnPointMod/scripts'),
   },
   module: {
     rules: [

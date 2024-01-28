@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/cotta.iml" filepath="$PROJECT_DIR$/.idea/cotta.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/SpawnPointMod.iml" filepath="$PROJECT_DIR$/.idea/SpawnPointMod.iml" />
     </modules>
   </component>
 </project>

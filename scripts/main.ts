@@ -6,7 +6,7 @@ import SecretEventService from "./SecretEventService";
 
 /***************** Global Variables ***********************/
 const reader: CommandReader = CommandReader.getReader();
-const shenService: SecretEventService = SecretEventService.getShenaniganService();
+const shenService: SecretEventService = SecretEventService.getSecretEventService();
 /**********************************************************/
 
 String.prototype.equalsIgnoreCase = function(this: string, compareTo: string):boolean {

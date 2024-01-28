@@ -1,7 +1,8 @@
 
 
-import { ChatSendBeforeEvent } from "@minecraft/server";
+import { ChatSendBeforeEvent, Player } from "@minecraft/server";
 import allCommands from "./resources/commands/index";
+import Command from "./resources/model/Command";
 
 /*
 Singleton class for reading chat events and parsing commands
@@ -25,14 +26,21 @@ export default class CommandReader{
 
     for (let cmd of allCommands){
       if (chatCommand.equalsIgnoreCase(cmd.getText())){
-        cmd.handle(event, args);
-        return;
+        if (this.canRunCommand(event.sender, cmd) && cmd.run(event, args)) return;
+
       }
     }
     event.sender.sendMessage("§c Error: Invalid command. Type §3!help §cto see a list of commands.")
+  }
 
-
-  };
+  /**
+   * returns true if the player has permission to run the command
+   * @param player
+   * @param command
+   */
+  canRunCommand(player: Player, command: Command):boolean {
+    return (!command.isPrivileged()) || player.isOp();
+  }
 
   private constructor() {
     CommandReader.reader = this;

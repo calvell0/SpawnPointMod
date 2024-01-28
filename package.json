@@ -1,7 +1,7 @@
 {
-  "name": "scripting-starter",
+  "name": "SpawnPointMod",
   "version": "0.1.0",
-  "productName": "Minecraft TypeScript Starter Project",
+  "productName": "SpawnPointMod",
   "description": "Minecraft TypeScript Starter Project",
   "private": true,
   "devDependencies": {
@@ -26,6 +26,7 @@
   "dependencies": {
     "@minecraft/server": "^1.8.0-beta.1.20.50-stable",
     "@minecraft/server-ui": "^1.2.0-beta.1.20.50-stable",
+    "@minecraft/vanilla-data": "^1.20.50",
     "decode-uri-component": "^0.2.2"
   }
 }
