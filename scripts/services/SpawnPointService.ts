@@ -1,29 +1,17 @@
-import {
-  DimensionLocation,
-  Entity,
-  EntityDieAfterEvent,
-  EntityQueryOptions,
-  Player,
-  PlayerSpawnAfterEvent,
-  system,
-  Vector3,
-  world,
-} from "@minecraft/server";
-import { getOriginalSpawn, isPlayer, vector3ToDimensionLocation } from "./resources/Utilities";
+import { EntityDieAfterEvent, Player, PlayerSpawnAfterEvent, Vector3, world } from "@minecraft/server";
+import { getOriginalSpawn, isPlayer } from "../resources/Utilities";
 import PlayerInterface from "./PlayerInterface";
 import { MessageFormResponse } from "@minecraft/server-ui";
 
-import { log } from "./resources/Log"
-
 export default class SpawnPointService {
-  private static spawnPointService: SpawnPointService;
+
+  private static _instance: SpawnPointService;
 
   //key: player id to be monitored value: original player spawn point
   private playerSpawnsToMonitor: Set<string>;
   private listeningToSpawns: boolean = false;
 
   private constructor() {
-    SpawnPointService.spawnPointService = this;
     this.listenToSpawns = this.listenToSpawns.bind(this);
     this.handleEntityDie = this.handleEntityDie.bind(this);
     this.handlePlayerSpawn = this.handlePlayerSpawn.bind(this);
@@ -31,11 +19,13 @@ export default class SpawnPointService {
     this.registerPlayerSpawn = this.registerPlayerSpawn.bind(this);
     this.playerSpawnsToMonitor = new Set();
     world.afterEvents.entityDie.subscribe(this.handleEntityDie);
+    SpawnPointService._instance = this;
   }
 
-  static getSpawnService(): SpawnPointService {
-    return SpawnPointService.spawnPointService || new SpawnPointService();
+  static getInstance(): SpawnPointService {
+    return SpawnPointService._instance || new SpawnPointService();
   }
+
 
   registerPlayerSpawn(player: Player): void {
     const playerLocation: Vector3 = player.getHeadLocation();
@@ -43,7 +33,7 @@ export default class SpawnPointService {
     x = Math.round(x);
     y = Math.round(y);
     z = Math.round(z);
-    
+
     player.setDynamicProperty(`spawn:secondary`, { x, y, z } as Vector3);
   }
 
@@ -92,7 +82,7 @@ export default class SpawnPointService {
 
     player.teleport({ x, y, z },
       {
-        dimension: world.getDimension("overworld")
+        dimension: world.getDimension("overworld"),
       });
 
     this.playerSpawnsToMonitor.delete(player.id);
@@ -102,7 +92,7 @@ export default class SpawnPointService {
     }
   }
 
-  getPlayerSpawn(player: Player):Vector3 | undefined {
+  getPlayerSpawn(player: Player): Vector3 | undefined {
     return player.getDynamicProperty("spawn:secondary") as Vector3 | undefined;
   }
 }

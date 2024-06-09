@@ -1,0 +1,8 @@
+{
+  "resource_pack_name": "Grenade Resource Pack",
+  "texture_data": {
+    "demo:grenade": {
+      "textures": "textures/items/grenade"
+    }
+  }
+}

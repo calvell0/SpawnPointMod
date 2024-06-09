@@ -4,7 +4,7 @@ import { Dimension, DimensionLocation, Entity, Player, Vector3, world } from "@m
 /**
  * Convert a Vector3 object to a DimensionLocation
  * @param vec - The Vector3 to be converted
- * @param [dimensionId=overworld] - The dimensionId to attach to the Vector3
+ * @param [dimensionId="overworld"] - The dimensionId to attach to the Vector3
  * @returns a DimensionLocation with the same x, y, z values as **vec**
  */
 export function vector3ToDimensionLocation(vec: Vector3, dimensionId: string = "overworld"): DimensionLocation {
@@ -46,9 +46,9 @@ export function getRandomNewLocation<Type extends Vector3 | DimensionLocation>(c
   return coordinates;
 }
 
-export function getPlayerFromList(name: string, list: PlayerTarget[]):PlayerTarget | undefined {
-  for(let pTarget of list){
-    if (name.equalsIgnoreCase(pTarget.username)){
+export function getPlayerFromList(name: string, list: PlayerTarget[]): PlayerTarget | undefined {
+  for (let pTarget of list) {
+    if (name.equalsIgnoreCase(pTarget.username)) {
       return pTarget;
     }
   }
@@ -59,7 +59,7 @@ export function getActivePlayerByName(name: string): Player | undefined {
   return world.getPlayers().filter(player => player.name === name)[0] || undefined;
 }
 
-export function randomChance(chance: number):boolean{
+export function randomChance(chance: number): boolean {
   const rng = Math.random();
   return rng < chance;
 }
@@ -70,31 +70,31 @@ export function randomChance(chance: number):boolean{
  * @param choices - Array of options you'd like to select from
  * @returns a randomly selected member of the **choices** that were passed
  */
-export function pickRandomUnweighted<T>(choices: T[]):T {
+export function pickRandomUnweighted<T>(choices: T[]): T {
   const rng = Math.random();
   const selectedIndex = Math.round(rng * (choices.length - 1));
   return choices[selectedIndex];
 }
 
-export function coordsToString(coords: Vector3 | DimensionLocation):string {
+export function coordsToString(coords: Vector3 | DimensionLocation): string {
   return coords.x + ", " + coords.y + ", " + coords.z;
 }
 
-function pickRandomWeighted<Type>(choices: WeightedChoice<Type>[]):Type {
+function pickRandomWeighted<Type>(choices: WeightedChoice<Type>[]): Type {
   choices = choices.sort(
     (a, b) => {
-     return a.weight - b.weight;
+      return a.weight - b.weight;
     });
   return choices[0].value;
 }
 
-export function replaceSpaces(originalString: string): string{
-  let spaceLocation: number;
+export function replaceSpaces(originalString: string) {
+  let spaceLocation;
   let newString = originalString.split("");
-  while((spaceLocation = originalString.indexOf("+")) !== -1){
+  while ((spaceLocation = newString.indexOf("+")) !== -1) {
     newString[spaceLocation] = " ";
   }
-  return newString.join();
+  return newString.join("");
 }
 
 

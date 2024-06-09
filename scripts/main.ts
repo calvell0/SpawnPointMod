@@ -1,26 +1,24 @@
 import { world } from "@minecraft/server";
 
-import CommandReader from "./CommandReader";
-import PlayerInterface from "./PlayerInterface";
-import SecretEventService from "./SecretEventService";
 
-/***************** Global Variables ***********************/
-const reader: CommandReader = CommandReader.getReader();
-const shenService: SecretEventService = SecretEventService.getSecretEventService();
-/**********************************************************/
+import { chatEventHandler, eventHandler } from "./services/index";
 
-String.prototype.equalsIgnoreCase = function(this: string, compareTo: string):boolean {
+
+String.prototype.equalsIgnoreCase = function(this: string, compareTo: string): boolean {
   return this.valueOf().toLowerCase() === compareTo.toLowerCase();
-}
+};
 
-world.afterEvents.playerSpawn.subscribe(PlayerInterface.handlePlayerLoad);
-world.beforeEvents.playerLeave.subscribe(shenService.handlePlayerLeave);
-world.afterEvents.playerSpawn.subscribe(shenService.identifyPlayerTargetOnSpawn); //check if newly joining players are jordan
+world.afterEvents.playerSpawn.subscribe(eventHandler.handlePlayerSpawn);
+world.beforeEvents.playerLeave.subscribe(eventHandler.handlePlayerLeave);
 
-world.afterEvents.playerInteractWithBlock.subscribe(shenService.handleBlockInteract);
+world.afterEvents.playerInteractWithBlock.subscribe(eventHandler.handleBlockInteract);
+// world.afterEvents.worldInitialize.subscribe(playerTargetManager.refreshActivePlayers);
+world.afterEvents.playerDimensionChange.subscribe(eventHandler.handleDimensionChange);
 
-world.beforeEvents.chatSend.subscribe(reader.handleChatEvents);
-world.beforeEvents.playerBreakBlock.subscribe(shenService.handleBlockBreak);
+world.beforeEvents.chatSend.subscribe(chatEventHandler.handleChat);
+world.beforeEvents.playerBreakBlock.subscribe(eventHandler.handleBlockBreak);
+
+
 
 
 
