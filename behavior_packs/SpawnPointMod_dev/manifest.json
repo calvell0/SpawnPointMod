@@ -1,0 +1,33 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "SpawnPointMod_dev",
+    "description": "My TS mod",
+    "uuid": "6740c511-810c-4873-94a4-13b488aed920",
+    "version": [0, 1, 8],
+    "min_engine_version": [1, 20, 30]
+  },
+  "modules": [
+    {
+    "description": "Script resources",
+    "language": "javascript",
+    "type": "script",
+    "uuid": "1ceb1d19-df31-483a-8169-f2cc75db4c20",
+    "version": [0, 1, 8],
+    "entry": "scripts/main.js"
+  },
+    {
+      "description": "Grenade",
+      "type": "data",
+      "uuid": "50fe1af1-cdc9-41d4-a916-17d9b0534b12",
+      "version": [0, 1, 8]
+    }
+  ],
+  "dependencies": [{
+    "module_name": "@minecraft/server",
+    "version": "1.11.0-beta"
+  }, {
+    "module_name": "@minecraft/server-ui",
+    "version": "1.2.0-beta"
+  }]
+}

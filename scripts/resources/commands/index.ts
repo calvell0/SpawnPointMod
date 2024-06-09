@@ -1,22 +1,22 @@
 import GetSpawn from "./GetSpawn";
 import SetSpawn from "./SetSpawn";
-import Command from "../model/Command";
 import Help from "./Help";
 import Yell from "./Yell";
-import SpawnPointService from "../../SpawnPointService";
-import SecretEventService from "../../SecretEventService";
-import { ToggleHarassment } from "./ToggleHarassment";
+import ToggleHarassment from "./ToggleHarassment";
+import Test from "./Test";
+import PlayerTargetManager from "../../services/PlayerTargetManager";
+import SpawnPointService from "../../services/SpawnPointService";
 
-const spawnService = SpawnPointService.getSpawnService();
-const secretService = SecretEventService.getSecretEventService();
+const playerTargetManager = PlayerTargetManager.getInstance();
+const spawnPointService = SpawnPointService.getInstance();
 
-const allCommands: Command[] = [
-  new GetSpawn(spawnService),
-  new SetSpawn(spawnService),
+let allCommands;
+export default allCommands = [
+  new GetSpawn(spawnPointService),
+  new SetSpawn(spawnPointService),
   new Help(),
   new Yell(),
-  new ToggleHarassment(secretService),
+  new ToggleHarassment(playerTargetManager),
+  new Test(),
 ];
 
-
-export default allCommands;

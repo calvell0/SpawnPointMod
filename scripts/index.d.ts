@@ -1,21 +1,22 @@
 import { DimensionLocation } from "@minecraft/server";
 
 declare global {
-  interface String{
+  interface String {
     equalsIgnoreCase(this: string, compareTo: string): boolean;
   }
-  interface Spawns{
+
+  interface Spawns {
     originalSpawn: DimensionLocation;
     secondarySpawn: DimensionLocation;
   }
 
-  interface PlayerTarget{
+  interface PlayerTarget {
     name: string;
     username: string;
-    shenanigan_level: number;
+    harassment_level: number;
   }
 
-  enum Rarity{
+  enum Rarity {
     common = 0.5,
     uncommon = 0.2,
     rare = 0.1,
@@ -24,7 +25,8 @@ declare global {
     extremely_rare = 0.001,
     never_happens = 0.0001
   }
-  interface WeightedChoice<Type>{
+
+  interface WeightedChoice<Type> {
     value: Type;
     weight: Rarity;
   }

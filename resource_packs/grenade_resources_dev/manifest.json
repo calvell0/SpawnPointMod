@@ -1,0 +1,18 @@
+{
+  "format_version": 2,
+  "header": {
+    "description": "Grenade Resource Pack",
+    "name": "Grenade Resource Pack",
+    "uuid": "49ac74ba-0d36-4ac0-9d4b-78d61e90f411",
+    "version": [0, 1, 8],
+    "min_engine_version": [1, 20, 30]
+  },
+  "modules": [
+    {
+      "description": "Grenade texture",
+      "type": "resources",
+      "uuid": "9aacf0ea-ca46-40ab-8950-b5480d244b25",
+      "version": [0, 1, 8]
+    }
+  ]
+}
